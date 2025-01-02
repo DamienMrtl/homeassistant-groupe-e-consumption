@@ -1,0 +1,11 @@
+{
+    "domain": "groupe_e_consumption",
+    "name": "Groupe E Consumption",
+    "version": "0.0.1",
+    "documentation": "https://github.com/DamienMrtl/homeassistant-groupe-e-consumption",
+    "requirements": ["aiohttp>=3.7.4"],
+    "codeowners": ["@DamienMrtl"],
+    "config_flow": true,
+    "dependencies": [],
+    "iot_class": "cloud_polling"
+  }
