@@ -7,5 +7,6 @@
     "codeowners": ["@DamienMrtl"],
     "config_flow": true,
     "dependencies": [],
-    "iot_class": "cloud_polling"
+    "iot_class": "cloud_polling",
+    "icon": "assets/icon.png"
   }

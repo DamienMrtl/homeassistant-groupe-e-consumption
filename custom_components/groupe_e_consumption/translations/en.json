@@ -1,0 +1,21 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "Please enter your my.groupe-e.ch credentials.",
+                "data": {
+                    "username": "E-mail",
+                    "password": "Password"
+                }
+            }
+        },
+        "error": {
+            "auth": "E-mail/Password is wrong.",
+            "connection": "Unable to connect to the API.",
+            "unknown": "Unknown error occurred."
+        },
+        "abort": {
+            "already_configured": "This entry is already configured."
+        }
+    }
+}

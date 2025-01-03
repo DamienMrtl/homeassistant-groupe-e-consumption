@@ -1,4 +1,5 @@
 """Constants for Groupe E Consumption integration."""
+
 from logging import Logger, getLogger
 
 # Base component constants
@@ -19,12 +20,19 @@ PLATFORMS = ["sensor"]
 CONF_ENABLED = "enabled"
 CONF_USERNAME = "username"
 CONF_PASSWORD = "password"
+CONF_PREMISE_ID = "premise_id"
+CONF_PARTNER_ID = "partner_id"
 
 # API details
-TOKEN_URL = "YOUR_TOKEN_URL"
 API_URL = "YOUR_API_URL"
-CLIENT_ID = "YOUR_CLIENT_ID"
-CLIENT_SECRET = "YOUR_CLIENT_SECRET"
+
+# OAuth2 details
+TOKEN_URL = (
+    "https://login.my.groupe-e.ch/realms/my-groupe-e/protocol/openid-connect/token"
+)
+CLIENT_ID = "portal"
+CLIENT_SECRET = "7EpnoktF0wOR5gwZPxPR2w7__p_rinCT4pcHywFFve0"
+SCOPE = "openid email impersonate portal"
 
 # Defaults
 DEFAULT_NAME = DOMAIN
