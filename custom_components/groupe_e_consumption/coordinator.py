@@ -77,7 +77,7 @@ class EnergyDataUpdateCoordinator(DataUpdateCoordinator):
             timezone = pytz.timezone("Europe/Zurich")
             today = datetime.now(timezone)
             today = today.replace(hour=0, minute=0, second=0, microsecond=0)
-            yesterday = today - timedelta(days=2)
+            yesterday = today - timedelta(days=1)
             yesterday_timestamp = yesterday.timestamp() * 1000
 
             if resolution == "daily":
