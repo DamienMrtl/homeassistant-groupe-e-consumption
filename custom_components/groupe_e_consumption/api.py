@@ -47,7 +47,13 @@ class GroupeEConsumptionAPI:
         async with self.session.get(url, headers=headers) as response:
             if response.status == 200:
                 data = await response.json()
-                premise_id = data["d"]["results"][0]["premiseID"]
+                if not data["d"]["results"]:
+                    _LOGGER.error("No premises found in Groupe E API")
+                    return None
+                if len(data["d"]["results"]) > 1:
+                    _LOGGER.error("Multiple premises found in Groupe E API")
+                    return None
+                premise_id = data["d"]["results"][0]["PremiseID"]
                 return premise_id
             else:
                 _LOGGER.error(

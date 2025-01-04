@@ -25,6 +25,8 @@ from .const import (
     STARTUP_MESSAGE,
 )
 from .coordinator import EnergyDataUpdateCoordinator
+from .stats_coordinator import StatsCoordinator
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -40,24 +42,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         hass.data.setdefault(DOMAIN, {})
         _LOGGER.info(STARTUP_MESSAGE)
 
-    username = entry.data.get(CONF_USERNAME)
-    password = entry.data.get(CONF_PASSWORD)
-
     session = async_get_clientsession(hass)
-    coordinator = EnergyDataUpdateCoordinator(hass, session, username, password)
+    coordinator = EnergyDataUpdateCoordinator(hass, session, entry)
     await coordinator.async_refresh()
 
     if not coordinator.last_update_success:
         raise ConfigEntryNotReady
 
-    hass.data[DOMAIN][entry.entry_id] = coordinator
+    hass.data[DOMAIN][f"{entry.entry_id}_sensors"] = coordinator
 
     for platform in PLATFORMS:
         if entry.options.get(platform, True):
             coordinator.platforms.append(platform)
-            hass.async_add_job(
-                hass.config_entries.async_forward_entry_setup(entry, platform)
-            )
+            await hass.config_entries.async_forward_entry_setups(entry, [platform])
 
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
@@ -66,9 +63,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         hass, coordinator.async_update_daily, hour=3, minute=0, second=0
     )
 
-    # Schedule monthly update on the 1st of each month at 3 AM
+    # Set up the quarter-hourly coordinator
+    stats_coordinator = StatsCoordinator(hass, session, entry)
+    await stats_coordinator.async_refresh()
+
+    if not stats_coordinator.last_update_success:
+        raise ConfigEntryNotReady
+
+    hass.data[DOMAIN][f"{entry.entry_id}_stats"] = stats_coordinator
+
+    # Schedule daily update at 3 AM for quarter-hourly data
     async_track_time_change(
-        hass, coordinator.async_update_monthly, day=1, hour=3, minute=0, second=0
+        hass, stats_coordinator.async_update_daily, hour=3, minute=0, second=0
     )
 
     return True
@@ -76,18 +82,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Handle removal of an entry."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    sensors_coordinator = hass.data[DOMAIN][f"{entry.entry_id}_sensors"]
     unloaded = all(
         await asyncio.gather(
             *[
                 hass.config_entries.async_forward_entry_unload(entry, platform)
                 for platform in PLATFORMS
-                if platform in coordinator.platforms
+                if platform in sensors_coordinator.platforms
             ]
         )
     )
     if unloaded:
+        # Clean up the coordinator
         hass.data[DOMAIN].pop(entry.entry_id)
+        hass.data[DOMAIN].pop(f"{entry.entry_id}_sensors")
+        hass.data[DOMAIN].pop(f"{entry.entry_id}_stats")
 
     return unloaded
 
